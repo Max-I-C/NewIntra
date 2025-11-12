@@ -1,18 +1,33 @@
 /* Check for changement */
+const isDarkModeEnabled = localStorage.getItem('darkMode') === 'true';
+
+/* Check for changement */
 const observer = new MutationObserver((mutations, obs) => {
     const grid = document.querySelector('.grid.bg-zinc-50');
     console.log('I ❤️');
+
     if (grid) {
-        applyDarkModeToGrid(grid);
-        applyDarkModeToHeader()
-        
-        const gridObserver = new MutationObserver(() => {
-            applyDarkModeToHeader()
+        /* Always activate the button */
+        applyDarkModeToSidebar();
+
+        /* Only apply if the dark theme is active */
+        if (isDarkModeEnabled) {
+            applyDarkModeToHeader();
+            applyDarkModeToFooter();
             applyDarkModeToGrid(grid);
+        }
+
+        const gridObserver = new MutationObserver(() => {
+            /* Only apply if the dark theme is active */
+            if (isDarkModeEnabled) {
+                applyDarkModeToHeader();
+                applyDarkModeToFooter();
+                applyDarkModeToSidebar();
+                applyDarkModeToGrid(grid);
+            }
         });
-        
+
         gridObserver.observe(grid, { childList: true, subtree: true });
-        
         obs.disconnect();
     }
 });
@@ -67,8 +82,65 @@ function applyDarkModeToHeader() {
         });
     });
 }
+
+function applyDarkModeToFooter() {
+    const footer = document.querySelector('.justify-center.flex.flex-col.gap-4.text-sm.text-gray-500.px-4.py-3.text-center.sm\\:flex-row');
+    
+    if (footer) {
+        console.log('✅ Footer trouvé');
+        
+        footer.style.backgroundColor = "#1E1E1E";
+        footer.style.color = "#AAAAAA";
+        
+        const footerLinks = footer.querySelectorAll('a, .hover\\:text-emerald-500');
+        footerLinks.forEach(link => {
+            link.style.color = "#CCCCCC";
+            
+            /* Hoover color change */
+            link.addEventListener('mouseenter', () => {
+                link.style.color = "#10B981";
+            });
+            
+            link.addEventListener('mouseleave', () => {
+                link.style.color = "#CCCCCC";
+            });
+        });
+        
+        const footerChildren = footer.querySelectorAll('*');
+        footerChildren.forEach(child => {
+            if (child.style.color.includes('107, 114, 128') ||
+                child.classList.contains('text-gray-500')) {
+                child.style.color = "#AAAAAA";
+            }
+        });
+    } else {
+        console.log('❌ Footer non trouvé');
+        
+        const alternativeSelectors = [
+            '[class*="footer"]',
+            '.text-gray-500.text-center',
+            '.px-4.py-3',
+            '.justify-center.flex'
+        ];
+        
+        for (let selector of alternativeSelectors) {
+            const altFooter = document.querySelector(selector);
+            if (altFooter && altFooter.textContent && altFooter.textContent.length > 10) {
+                console.log('✅ Footer trouvé avec sélecteur alternatif:', selector);
+                altFooter.style.backgroundColor = "#1E1E1E";
+                altFooter.style.color = "#AAAAAA";
+                
+                const links = altFooter.querySelectorAll('a');
+                links.forEach(link => {
+                    link.style.color = "#CCCCCC";
+                });
+                break;
+            }
+        }
+    }
+}
+
 function applyDarkModeToGrid(grid) {
-    // Define the theme in general in the background of the card //
     grid.style.backgroundColor = "#1E1E1E";
     grid.style.color = "#FFFFFF";
     grid.style.transition = "background-color 0.5s, color 0.5s";
@@ -158,24 +230,78 @@ function applyDarkModeToGrid(grid) {
         * { scrollbar-width: thin; scrollbar-color: #555 #1E1E1E; }
     `;
     document.head.appendChild(style);
+}
 
-    /* Banner message */
-    if (!document.getElementById("darkmode-banner")) {
-        const banner = document.createElement("div");
-        banner.id = "darkmode-banner";
-        banner.textContent = "🌙 Mode sombre activé sur la grille + achievements";
-        banner.style.position = "fixed";
-        banner.style.top = "0";
-        banner.style.left = "0";
-        banner.style.width = "100%";
-        banner.style.backgroundColor = "#000";
-        banner.style.color = "#FFF";
-        banner.style.textAlign = "center";
-        banner.style.padding = "10px";
-        banner.style.zIndex = "9999";
-        banner.style.fontSize = "18px";
-        document.body.appendChild(banner);
-        setTimeout(() => banner.remove(), 2000);
+/* Setting the button to the side bar */
+function applyDarkModeToSidebar() {
+    const sidebarSelectors = [
+        '.bg-\\[44E5566\\]',
+        '.sidebar-animation',
+        '.left-\\[-100%\\]',
+        '[class*="sidebar"]',
+        '.min-h-screen.flex.flex-col.justify-between'
+    ];
+    
+    let sidebar = null;
+    for (let selector of sidebarSelectors) {
+        sidebar = document.querySelector(selector);
+        if (sidebar) break;
+    }
+    
+    if (!sidebar) return;
+
+    if (!document.getElementById("darkmode-toggle-sidebar")) {
+        const toggleBtn = document.createElement("button");
+        toggleBtn.id = "darkmode-toggle-sidebar";
+        toggleBtn.innerHTML = isDarkModeEnabled ? '☀️' : '🌙';
+        toggleBtn.title = "Toggle Dark Mode";
+        
+        toggleBtn.style.cssText = `
+            width: 45px;
+            height: 45px;
+            border-radius: 22px;
+            border: 2px solid #666;
+            background: ${isDarkModeEnabled ? "#2C2C2C" : "#f0f0f0"};
+            color: ${isDarkModeEnabled ? "#FFD700" : "#333"};
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            margin: 15px auto;
+        `;
+        
+        toggleBtn.addEventListener('click', function() {
+            const currentlyDark = localStorage.getItem('darkMode') === 'true';
+            localStorage.setItem('darkMode', !currentlyDark);
+            location.reload();
+        });
+        
+        const firstContainer = sidebar.querySelector('.flex.flex-col.w-full:first-child');
+        if (firstContainer) {
+            const btnWrapper = document.createElement("div");
+            btnWrapper.style.cssText = `
+                display: flex;
+                justify-content: center;
+                padding: 10px 0;
+                border-bottom: 1px solid #333;
+            `;
+            btnWrapper.appendChild(toggleBtn);
+            firstContainer.insertBefore(btnWrapper, firstContainer.firstChild);
+        }
+    }
+
+    if (isDarkModeEnabled) {
+        console.log('✅ Sidebar en mode sombre appliquée');
+        sidebar.style.backgroundColor = "#1E1E1E";
+        sidebar.style.color = "#FFFFFF";
+
+        const links = sidebar.querySelectorAll('a');
+        links.forEach(link => {
+            link.style.color = "#CCCCCC";
+            link.style.transition = "color 0.2s ease";
+        });
     }
 }
 
