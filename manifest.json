@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Improved Intra",
+  "name": "New Intra",
   "version": "1.0",
-  "description": "Améliore l'Intra de l'école",
+  "description": "Upgrading the intra of 42",
   "content_scripts": [
     {
       "matches": ["https://profile-v3.intra.42.fr/*"],
