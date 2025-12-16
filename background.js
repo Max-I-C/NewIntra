@@ -1,4 +1,5 @@
 /* Ici on va gerer tout les elements du background */
+/* Cette partie ne fonctionne pas au campus -_-, changement du [HOLY_GRAPH] pour celui de Belgique -> le meilleur */
 chrome.runtime.onInstalled.addListener(() => {
     chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: [42],
